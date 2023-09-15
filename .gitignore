@@ -1,0 +1,12 @@
+# Nextflow
+/work
+/.nextflow/
+/.nextflow.log
+/.nextflow.log.*
+/tmp
+
+# External python stuff
+/src
+
+# OS
+.DS_Store

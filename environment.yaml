@@ -1,0 +1,15 @@
+name: sdrf_usage_showcase
+channels:
+  - defaults
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - setuptools
+  - pip
+  - nextflow
+  - flashlfq
+  - peptide-shaker
+  - xtandem
+  - pip:
+    - -e git+https://github.com/elixir-proteomics-community/sdrf_convert#egg=sdrf_convert
