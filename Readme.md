@@ -36,4 +36,9 @@ Unfortunatly the workflow currently stops when firing up PeptideShaker
 To make our Nextflow-workflows better available, we created a web application called [NF-Cloud](https://github.com/mpc-bioinformatics/nf-cloud) to run the workflows directly in a cloud environment. The image below shows the settings of a decoy database creation workflow:
 ![](images/nf_cloud.png)
 
+## Other projects using SDRF
+Also [Wombat-P](https://github.com/wombat-p/WOMBAT-Pipelines) is heavily using SDRF in their pipelines.
+
+
+
 
