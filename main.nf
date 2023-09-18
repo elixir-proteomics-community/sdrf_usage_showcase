@@ -5,11 +5,12 @@ params.sdrf = ""
 params.fasta = ""
 params.mzml_dir = ""
 params.out_dir = ""
-params.maxed_missed_cleavages = 2
+params.max_missed_cleavages = 2
 params.max_charge = 4
+params.max_threads = 4
 
 process create_xtandem_xmls {
-    publishDir "${params.out_dir}", mode:'copy'
+    publishDir "${params.out_dir}/xtandem_params", mode:'copy'
 
     input:
     path(sdrf)
@@ -23,18 +24,19 @@ process create_xtandem_xmls {
     mkdir -p xtandem_confs/
     # Create xtandem input files. All pathes are relative to the current directory
     # as the files will be linked into the next process's working directory
-    python -m sdrf_convert ${sdrf} tandem -r ${params.mzml_dir} -f ${fasta} -x ./ -o ./ -m ${params.maxed_missed_cleavages} -c ${params.max_charge}
+    python -m sdrf_convert ${sdrf} tandem -r ${params.mzml_dir} -f ${fasta} -x ./ -o ./ -m ${params.max_missed_cleavages} -c ${params.max_charge} -t ${params.max_threads}
     """
 }
 
 process xtandem {
+    cpus 4
     publishDir "${params.out_dir}/idents", mode:'copy'
 
     input:
     path input_conf
 
     output:
-    path "*.mzML.xml"
+    path "*.t.xml"
 
     """
     xtandem ${input_conf}
@@ -42,6 +44,7 @@ process xtandem {
 }
 
 process peptide_shaker {
+    cpus 4
     publishDir "${params.out_dir}/idents", mode:'copy'
 
     input:
@@ -52,21 +55,23 @@ process peptide_shaker {
     output:
     path("./shaker.psdb")
 
-    """
+    shell:
+    '''
     # Create peptide shaker identifications files
-    idparamscli_params=(\$(python -m sdrf_convert ${sdrf} identificationparameterscli))
-    sh -c 'peptide-shaker eu.isas.peptideshaker.cmd.IdentificationParametersCLI "\${idparamscli_params}" -out ./id_params.par'
+    idparamscli_params="$(python -m sdrf_convert !{sdrf} identificationparameterscli)"
+    sh -c "peptide-shaker eu.isas.peptideshaker.cmd.IdentificationParametersCLI ${idparamscli_params} -fasta_target_decoy 1 -fasta_decoy_tag 'DECOY_' -fasta_decoy_type 0 -fasta_decoy_file_tag '-target_decoy' -out ./id_params.par"
 
     # Move the links into one directory
     mkdir -p ./idents
-    mv ${idents} ./idents
-
+    mv !{idents} ./idents
+    
     # Run peptide shaker
-    peptide-shaker eu.isas.peptideshaker.cmd.PeptideShakerCLI -reference sdrf-hupo-showcase -fasta_file ${fasta} -identification_files ./idents -spectrum_files ${params.mzml_dir} -id_params ./id_params.par -out "./shaker.psdb"
-    """
+    peptide-shaker eu.isas.peptideshaker.cmd.PeptideShakerCLI -reference sdrf-hupo-showcase -fasta_file !{fasta} -identification_files ./idents -spectrum_files !{params.mzml_dir} -id_params ./id_params.par -out ./shaker.psdb -threads !{params.max_threads}
+    '''
 }
 
 process flashlfq {
+    cpus 4
     publishDir "${params.out_dir}/quant", mode:'copy'
 
     input:
@@ -74,16 +79,21 @@ process flashlfq {
     path(peptide_shaker_psdb)
 
     output:
-    path("./quant/*")
+    path("./QuantifiedPeaks.tsv")
+    path("./QuantifiedPeptides.tsv")
+    path("./QuantifiedProteins.tsv")
 
-    """
-    # Read tolerance from SDRF
-    ppm=\$(python -m sdrf_convert ${sdrf} flashlfq)
+    shell:
+    '''
     # Convert peptide shaker results to tsv: https://github.com/smith-chem-wisc/FlashLFQ/issues/125
-    peptide-shaker eu.isas.peptideshaker.cmd.ReportCLI -in ${peptide_shaker_psdb} -out ${params.out_dir}/idents -reports 11
+    peptide-shaker eu.isas.peptideshaker.cmd.ReportCLI -in !{peptide_shaker_psdb} -out_reports !{params.out_dir}/idents -reports 11
+
+    # Read tolerance from SDRF
+    ppm="$(python -m sdrf_convert !{sdrf} flashlfq)"
+
     # Run FlashLFQ
-    sh -c 'FlashLFQ --idt "/home/myfolder/msms.txt" --rep "./quant" "\${ppm}"'
-    """
+    FlashLFQ --idt "!{params.out_dir}/idents/sdrf-hupo-showcase_Extended_PSM_Report.txt" --rep "!{params.mzml_dir}" --out ./ ${ppm} --thr !{params.max_threads}
+    '''
 }
 
 workflow {

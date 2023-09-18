@@ -28,9 +28,11 @@ conda activate sdrf_usage_showcase
 ```
 mkdir -p tmp/mzml
 # Download the mzml-archive, extract it and put the files into the folder
-nextflow main.nf --sdrf $(pwd)/data/PXD011153.sdrf.tsv --fasta $(pwd)/data/ref_mus_musculus.fasta --mzml_dir $(pwd)/tmp/mzml --out_dir $(pwd)/tmp --maxed_missed_cleavages 2 --max_charge 4
+nextflow main.nf --sdrf $(pwd)/data/PXD011153.sdrf.tsv --fasta $(pwd)/data/ref_mus_musculus.fasta --mzml_dir $(pwd)/tmp/mzml --out_dir $(pwd)/tmp --max_missed_cleavages 2 --max_charge 4
 ```
-Unfortunatly the workflow currently stops when firing up PeptideShaker
+***Attention**: You MUST provide the paths to the files absolutely, or use the `$(pwd)` command like in the example.
+
+The actual results are not very nice, but the showcase works and highlights the usage of SDRF and the converters.
 
 ## Making it more easy!
 To make our Nextflow-workflows better available, we created a web application called [NF-Cloud](https://github.com/mpc-bioinformatics/nf-cloud) to run the workflows directly in a cloud environment. The image below shows the settings of a decoy database creation workflow:
