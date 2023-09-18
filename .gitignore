@@ -8,5 +8,8 @@
 # External python stuff
 /src
 
+# created by execution of pipeline, if you have the data files inside the git repo
+*.cms
+
 # OS
 .DS_Store
