@@ -3,7 +3,6 @@
 This repository is a showcase how multiple tools, developed by the ELIXIR protoemic community, are used to annotate a [dataset](https://www.ebi.ac.uk/pride/archive/projects/PXD011153) using Protoeimc-SDRF file and utilizing this file to complete configure a data analysis pipeline.   
 
 
-
 ## 1. SDRF creation
 The SDRF was created with [lesSDRF](https://lessdrf.streamlit.app/). lesSDRF is a web-based tool which guides users through the process of creating a SDRF for their datasets.
 
