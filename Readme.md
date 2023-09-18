@@ -26,8 +26,8 @@ conda activate sdrf_usage_showcase
 ### Usage
 ```
 mkdir -p tmp/mzml
-# Download the mzml-archive, extract it and put the files into the folder
-nextflow main.nf --sdrf $(pwd)/data/PXD011153.sdrf.tsv --fasta $(pwd)/data/ref_mus_musculus.fasta --mzml_dir $(pwd)/tmp/mzml --out_dir $(pwd)/tmp --max_missed_cleavages 2 --max_charge 4
+# Download the mzml-archive, extract it and put the files into the folder ./tmp/mzml
+nextflow main.nf --sdrf $(pwd)/data/PXD011153.sdrf.tsv --fasta $(pwd)/data/ref_mus_musculus-nicer_headers-target_decoy.fasta --mzml_dir $(pwd)/tmp/mzml --out_dir $(pwd)/tmp --max_missed_cleavages 2 --max_charge 4
 ```
 ***Attention***: You MUST provide the paths to the files absolutely, or use the `$(pwd)` command like in the example.
 
